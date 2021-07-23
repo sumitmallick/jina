@@ -199,7 +199,7 @@ class DocumentArrayMemmap(TraversableSequence, DocumentArrayGetAttrMixin, Itr):
         # TODO: shouldn't key here be str_key instead ?
         self._header.write(
             np.array(
-                (key, -1, -1, -1),
+                (str_key, -1, -1, -1),
                 dtype=[
                     ('', (np.str_, self._key_length)),
                     ('', np.int64),
@@ -211,6 +211,7 @@ class DocumentArrayMemmap(TraversableSequence, DocumentArrayGetAttrMixin, Itr):
         self._header.seek(0, 2)
         self._header.flush()
         self._header_map.pop(str_key)
+        self.prune()
 
     def __delitem__(self, key: Union[int, str, slice]):
         if isinstance(key, str):
@@ -244,7 +245,7 @@ class DocumentArrayMemmap(TraversableSequence, DocumentArrayGetAttrMixin, Itr):
         for k in self._header_map.keys():
             yield self[k]
 
-    def __setitem__(self, key: Union[int, str], value: 'Document') -> None:
+    def __setitem__(self, key: Union[int, str, slice], value: 'Document') -> None:
         if isinstance(key, int):
             if 0 <= key < len(self):
                 # override an existing entry
